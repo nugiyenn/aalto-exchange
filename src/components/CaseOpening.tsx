@@ -97,12 +97,6 @@ export function CaseOpening({ universities, onComplete, onClose }: CaseOpeningPr
 
       <div className="w-full max-w-6xl flex flex-col items-center">
         
-        <div className="mb-10 text-center">
-          <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-600 uppercase tracking-widest mb-2">
-            Feeling Lucky
-          </h2>
-          <p className="text-slate-400 text-lg">Finding your next destination...</p>
-        </div>
 
         {/* The Case Opening Container */}
         <div className="relative w-full h-64 bg-slate-900 border-y-4 border-slate-800 shadow-[inset_0_0_100px_rgba(0,0,0,0.8)] overflow-hidden flex items-center">

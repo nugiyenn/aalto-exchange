@@ -45,9 +45,6 @@ export function ShortlistModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
               {shortlist.length}/3
             </span>
           </h2>
-          <p className="text-slate-600 mt-2 text-sm">
-            Rank your top exchange destinations. When you're ready, generate a share link and drop it in your group chats to get your friends' thoughts!
-          </p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
