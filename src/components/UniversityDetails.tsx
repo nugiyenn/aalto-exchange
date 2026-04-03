@@ -88,7 +88,7 @@ export function UniversityDetails() {
     const searchName = normalizeName(rawSearchName);
     
     // First, try exact or simple inclusion
-    let match = techStats.find(stat => {
+    const match = techStats.find(stat => {
       const statName = normalizeName(stat.university_name);
       return searchName.includes(statName) || statName.includes(searchName);
     });
