@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUniversityContext } from '../context/UniversityContext';
-import { Trophy, MapPin, X, Globe2, BookOpen, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users } from 'lucide-react';
+import { Trophy, MapPin, X, Globe2, BookOpen, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users, Wallet, Heart } from 'lucide-react';
 import techStats from '../data/tech-statistics.json';
 import dynamic from 'next/dynamic';
 import Fuse from 'fuse.js';
+import { getCostTier } from '../lib/cost';
 
 const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
   () => import('./MiniMap'), 
@@ -31,7 +32,7 @@ const normalizeName = (name: string) => {
 };
 
 export function UniversityDetails() {
-  const { selectedUniversityId, setSelectedUniversityId, universities } = useUniversityContext();
+  const { selectedUniversityId, setSelectedUniversityId, universities, shortlist, addToShortlist, removeFromShortlist } = useUniversityContext();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [details, setDetails] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -123,6 +124,8 @@ export function UniversityDetails() {
     index_2022: '-'
   };
 
+  const costTier = getCostTier(baseUni.country_fullname || baseUni.country, baseUni.universityname);
+
   // Parse details map
   const info = details?.details || {};
   const reportsCount = (details?.travelReports?.length || 0) + (details?.attachments?.length || 0);
@@ -184,9 +187,42 @@ export function UniversityDetails() {
             {baseUni.universityname}
           </h2>
           
-          <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-            <MapPin className="w-4 h-4 text-rose-400" />
-            {baseUni.country_fullname}
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 font-medium">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-rose-400" />
+              {baseUni.country_fullname}
+            </span>
+            
+            {costTier && (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-300">•</span>
+                <span title="Relative Cost of Living vs Helsinki" className={`px-2 py-0.5 rounded text-xs font-bold ${costTier.color} border bg-opacity-40 flex items-center gap-1`}>
+                  <Wallet className="w-3 h-3" />
+                  {costTier.label}
+                </span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-2 ml-auto">
+              {shortlist.includes(baseUni.core_id) ? (
+                <button
+                  onClick={() => removeFromShortlist(baseUni.core_id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors border border-rose-200"
+                >
+                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  Shortlisted ({shortlist.indexOf(baseUni.core_id) + 1}/3)
+                </button>
+              ) : (
+                <button
+                  onClick={() => addToShortlist(baseUni.core_id)}
+                  disabled={shortlist.length >= 3}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border border-slate-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Heart className="w-3.5 h-3.5" />
+                  Add to Shortlist
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -398,14 +434,14 @@ export function UniversityDetails() {
                 
                 {reportsCount > 0 && (
                   <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-indigo-100 p-6">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <div className="bg-purple-100 text-purple-600 p-2 rounded-lg shrink-0">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-purple-900 flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-bold text-purple-900 flex items-center gap-2">
                           AI Summary
                           <span className="bg-purple-200 text-purple-700 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold tracking-wider">Coming Soon</span>
                         </h4>

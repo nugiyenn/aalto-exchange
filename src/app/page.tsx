@@ -2,12 +2,14 @@
 
 import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare, List as ListIcon, Heart, Share2, Trash2 } from 'lucide-react';
 import { useUniversityContext } from '../context/UniversityContext';
 import { UniversityCard } from '../components/UniversityCard';
 import { UniversityDetails } from '../components/UniversityDetails';
 import { CaseOpening } from '../components/CaseOpening';
 import { AboutModal } from '../components/AboutModal';
+import { ShortlistModal } from '../components/ShortlistModal';
+import { DestinationDirectory } from '../components/DestinationDirectory';
 
 // Dynamically import the big map component with ssr: false to prevent Next.js hydration errors
 const DynamicMap = dynamic(() => import('../components/Map'), {
@@ -30,13 +32,19 @@ export default function Dashboard() {
     setSelectedUniversityId,
     selectedSchool,
     setSelectedSchool,
+    selectedRegion,
+    setSelectedRegion,
+    shortlist,
+    removeFromShortlist,
   } = useUniversityContext();
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [sortMethod, setSortMethod] = useState<'country' | 'qs'>('country');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isShortlistOpen, setIsShortlistOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
+  const [rightPaneView, setRightPaneView] = useState<'map' | 'directory'>('map');
 
   // If a user selects a university on mobile, auto-switch to map view to show details
   React.useEffect(() => {
@@ -46,6 +54,15 @@ export default function Dashboard() {
       setMobileView('list');
     }
   }, [selectedUniversityId]);
+
+  // Open shortlist automatically if URL has '?top=' on first render
+  const isFirstRender = React.useRef(true);
+  React.useEffect(() => {
+    if (isFirstRender.current && shortlist.length > 0) {
+      setIsShortlistOpen(true);
+      isFirstRender.current = false;
+    }
+  }, [shortlist]);
 
   // Clear selected country when search query changes to ensure users see filtered flat results if needed
   React.useEffect(() => {
@@ -98,6 +115,14 @@ export default function Dashboard() {
         
         <div className="flex items-center gap-4 sm:gap-6 text-sm font-semibold text-slate-500">
           <button 
+            onClick={() => setIsShortlistOpen(true)} 
+            className={`flex items-center gap-1.5 transition-colors ${shortlist.length > 0 ? 'text-rose-500 hover:text-rose-600 font-bold' : 'hover:text-slate-900'}`}
+          >
+            <Heart className={`w-4 h-4 ${shortlist.length > 0 ? 'fill-current' : ''}`} />
+            <span className="hidden sm:inline">Shortlist {shortlist.length > 0 && `(${shortlist.length}/3)`}</span>
+          </button>
+
+          <button 
             onClick={() => setIsAboutOpen(true)} 
             className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
           >
@@ -106,7 +131,7 @@ export default function Dashboard() {
           </button>
           
           <a 
-            href="mailto:feedback@example.com?subject=Aalto Exchange Feedback" 
+            href="mailto:mshpj51b4@mozmail.com" 
             className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
           >
             <MessageSquare className="w-4 h-4" />
@@ -137,26 +162,49 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filter by School</label>
-              <div className="relative">
-                <select
-                  value={selectedSchool}
-                  onChange={(e) => setSelectedSchool(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-lg py-2.5 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black text-slate-900 font-medium shadow-sm appearance-none cursor-pointer"
-                >
-                  <option value="">All Aalto Schools</option>
-                  <option value="1">School of Chemical Engineering (CHEM)</option>
-                  <option value="2">School of Science (SCI)</option>
-                  <option value="3">School of Engineering (ENG)</option>
-                  <option value="4">School of Electrical Engineering (ELEC)</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">School</label>
+                <div className="relative">
+                  <select
+                    value={selectedSchool}
+                    onChange={(e) => setSelectedSchool(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black text-slate-900 font-medium shadow-sm appearance-none cursor-pointer"
+                  >
+                    <option value="">All Schools</option>
+                    <option value="1">CHEM</option>
+                    <option value="2">SCI</option>
+                    <option value="3">ENG</option>
+                    <option value="4">ELEC</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Region</label>
+                <div className="relative">
+                  <select
+                    value={selectedRegion}
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black text-slate-900 font-medium shadow-sm appearance-none cursor-pointer"
+                  >
+                    <option value="">Anywhere</option>
+                    <option value="Europe">Europe</option>
+                    <option value="Asia">Asia</option>
+                    <option value="North America">North America</option>
+                    <option value="South America">South America</option>
+                    <option value="Oceania">Oceania</option>
+                    <option value="Africa">Africa</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
             </div>
 
             <button
               onClick={handleFeelingLucky}
+              suppressHydrationWarning
               disabled={isLoading || filteredUniversities.length === 0}
               className="mt-2 w-full bg-slate-900 text-white rounded-lg py-2.5 px-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             >
@@ -263,7 +311,25 @@ export default function Dashboard() {
             {selectedUniversityId ? (
               <UniversityDetails />
             ) : (
-              <DynamicMap />
+              <>
+                <div className="absolute top-4 right-4 z-[400] bg-white rounded-lg shadow-md flex p-1 border border-slate-200">
+                  <button 
+                    onClick={() => setRightPaneView('map')} 
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all ${rightPaneView === 'map' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    <MapIcon className="w-4 h-4" />
+                    Map View
+                  </button>
+                  <button 
+                    onClick={() => setRightPaneView('directory')} 
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all ${rightPaneView === 'directory' ? 'bg-slate-100 text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  >
+                    <ListIcon className="w-4 h-4" />
+                    Directory
+                  </button>
+                </div>
+                {rightPaneView === 'map' ? <DynamicMap /> : <DestinationDirectory />}
+              </>
             )}
           </div>
         </section>
@@ -301,6 +367,9 @@ export default function Dashboard() {
 
       {/* About / Disclaimer Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* Shortlist Modal */}
+      <ShortlistModal isOpen={isShortlistOpen} onClose={() => setIsShortlistOpen(false)} />
     </div>
   );
 }

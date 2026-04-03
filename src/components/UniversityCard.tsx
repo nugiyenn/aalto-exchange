@@ -1,6 +1,7 @@
 import React from 'react';
-import { Trophy, MapPin } from 'lucide-react';
 import { University } from '../types/university';
+import { MapPin, Trophy, Wallet } from 'lucide-react';
+import { getCostTier } from '../lib/cost';
 
 interface UniversityCardProps {
   university: University;
@@ -9,7 +10,10 @@ interface UniversityCardProps {
 }
 
 export function UniversityCard({ university, isSelected = false, onClick }: UniversityCardProps) {
-  const { universityname, country, qsRank, studyOpportunity } = university;
+  const { universityname, country, qsRank, studyOpportunity, country_fullname } = university;
+  
+  const cName = country_fullname || country;
+  const costTier = getCostTier(cName, universityname);
   
   // Format study opportunity (e.g., "Erasmus: Universiteit Twente - SCI (IEM)" -> "Erasmus: SCI (IEM)")
   const formatStudyOpp = (opp: string | null, uniName: string) => {
@@ -56,17 +60,23 @@ export function UniversityCard({ university, isSelected = false, onClick }: Univ
       </div>
       
       <div className="mt-3 flex items-center text-xs">
-        <div className="flex items-start gap-1.5 text-slate-500">
-          <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="font-medium leading-snug flex flex-wrap items-center gap-1.5">
-            <span>{universityname.split(',')[0]}</span>
-            <span className="bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-sky-200 shrink-0">
-              {country}
-            </span>
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex items-start gap-1.5 text-slate-500">
+            <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+            <div className="font-medium leading-snug flex flex-wrap items-center gap-1.5">
+              <span>{cName}</span>
+            </div>
           </div>
+          {costTier && (
+            <div className="flex gap-1.5 flex-wrap">
+              <span title="Relative Cost of Living vs Helsinki" className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${costTier.color} border bg-opacity-30 flex items-center gap-1`}>
+                <Wallet className="w-3 h-3" />
+                {costTier.label}
+              </span>
+            </div>
+          )}
         </div>
       </div>
-
     </div>
   );
 }

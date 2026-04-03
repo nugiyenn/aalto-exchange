@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# Local logs and process IDs
+*.log
+*.pid
+dev_output.html
+page_output.html
+download_fallback.mjs

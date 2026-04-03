@@ -51,21 +51,14 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <div className="space-y-1">
               <h4 className="font-bold text-amber-900">Important Disclaimer</h4>
               <p className="text-xs">
-                This is a student-developed tool and is <strong>not officially affiliated</strong> with or endorsed by Aalto University. 
+                This project is <strong>not officially affiliated</strong> with or endorsed by Aalto University. 
                 While it synchronizes with the official MoveON database, parsing errors may occur. Always verify your eligibility, language requirements, and application deadlines on the official Aalto MoveON portal before applying.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-          <button 
-            onClick={onClose}
-            className="px-5 py-2 bg-slate-900 text-white text-sm font-bold rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
-          >
-            I Understand
-          </button>
-        </div>
+
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode, useRef } from 'react';
 import Fuse from 'fuse.js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { University } from '../types/university';
+import { getContinent } from '../lib/continents';
 
 interface UniversityContextProps {
   universities: University[];
@@ -16,6 +17,12 @@ interface UniversityContextProps {
   setSelectedUniversityId: (id: string | null) => void;
   selectedSchool: string;
   setSelectedSchool: (schoolId: string) => void;
+  selectedRegion: string;
+  setSelectedRegion: (region: string) => void;
+  shortlist: string[];
+  addToShortlist: (id: string) => void;
+  removeFromShortlist: (id: string) => void;
+  clearShortlist: () => void;
 }
 
 const UniversityContext = createContext<UniversityContextProps | undefined>(undefined);
@@ -24,6 +31,7 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const uniParam = searchParams.get('uni');
+  const topParam = searchParams.get('top');
 
   const [universities, setUniversities] = useState<University[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -33,6 +41,12 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
   // Initialize from URL if present
   const [selectedUniversityId, setSelectedUniversityIdState] = useState<string | null>(uniParam);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [shortlist, setShortlist] = useState<string[]>(
+    topParam ? topParam.split(',').filter(Boolean) : []
+  );
+  
+  const isFirstRender = useRef(true);
 
   // Update URL when selected university changes
   const setSelectedUniversityId = (id: string | null) => {
@@ -58,6 +72,43 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
       setSelectedUniversityIdState(uniParam);
     }
   }, [uniParam, selectedUniversityId]);
+
+  useEffect(() => {
+    const currentTop = topParam ? topParam.split(',').filter(Boolean) : [];
+    if (currentTop.join(',') !== shortlist.join(',')) {
+      setShortlist(currentTop);
+    }
+  }, [topParam, shortlist]);
+
+  const updateShortlistUrl = (newShortlist: string[]) => {
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (newShortlist.length > 0) {
+      newParams.set('top', newShortlist.join(','));
+    } else {
+      newParams.delete('top');
+    }
+    const paramString = newParams.toString();
+    router.push(paramString ? `/?${paramString}` : '/', { scroll: false });
+  };
+
+  const addToShortlist = (id: string) => {
+    if (shortlist.length < 3 && !shortlist.includes(id)) {
+      const newShortlist = [...shortlist, id];
+      setShortlist(newShortlist);
+      updateShortlistUrl(newShortlist);
+    }
+  };
+
+  const removeFromShortlist = (id: string) => {
+    const newShortlist = shortlist.filter(item => item !== id);
+    setShortlist(newShortlist);
+    updateShortlistUrl(newShortlist);
+  };
+
+  const clearShortlist = () => {
+    setShortlist([]);
+    updateShortlistUrl([]);
+  };
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -86,7 +137,12 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
     };
 
     fetchUniversities();
-    setSelectedUniversityId(null); // Clear selection when school changes
+    
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+    } else {
+      setSelectedUniversityId(null); // Clear selection when school changes
+    }
   }, [selectedSchool]);
 
   // Initialize Fuse instance when universities load
@@ -107,12 +163,21 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
   }, [universities]);
 
   const filteredUniversities = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return universities;
+    let results = universities;
+
+    if (searchQuery.trim()) {
+      results = fuse.search(searchQuery).map(result => result.item);
     }
-    const results = fuse.search(searchQuery);
-    return results.map(result => result.item);
-  }, [searchQuery, universities, fuse]);
+
+    if (selectedRegion) {
+      results = results.filter(uni => {
+        const country = uni.country_fullname || uni.country;
+        return getContinent(country) === selectedRegion;
+      });
+    }
+
+    return results;
+  }, [searchQuery, universities, fuse, selectedRegion]);
 
   return (
     <UniversityContext.Provider
@@ -127,6 +192,12 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
         setSelectedUniversityId,
         selectedSchool,
         setSelectedSchool,
+        selectedRegion,
+        setSelectedRegion,
+        shortlist,
+        addToShortlist,
+        removeFromShortlist,
+        clearShortlist,
       }}
     >
       {children}
