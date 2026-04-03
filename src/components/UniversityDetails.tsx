@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUniversityContext } from '../context/UniversityContext';
-import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users } from 'lucide-react';
+import { Trophy, MapPin, X, Globe2, BookOpen, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users } from 'lucide-react';
 import techStats from '../data/tech-statistics.json';
 import dynamic from 'next/dynamic';
 import Fuse from 'fuse.js';
@@ -32,7 +32,8 @@ const normalizeName = (name: string) => {
 
 export function UniversityDetails() {
   const { selectedUniversityId, setSelectedUniversityId, universities } = useUniversityContext();
-  const [details, setDetails] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [details, setDetails] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'reports'>('overview');
 
@@ -215,8 +216,28 @@ export function UniversityDetails() {
 
       <div className="flex-1 overflow-y-auto bg-slate-50">
         {loading ? (
-          <div className="p-12 flex justify-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="p-8 max-w-4xl mx-auto space-y-8 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-slate-200 rounded-xl h-64 w-full"></div>
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col justify-center space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-slate-200 rounded w-2/3"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/4 mb-2 mt-4"></div>
+                <div className="h-6 bg-slate-200 rounded w-1/2"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/3 mb-2 mt-4"></div>
+                <div className="h-6 bg-slate-200 rounded w-1/4"></div>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+              <div className="h-6 bg-slate-200 rounded w-1/4 mb-6"></div>
+              <div className="space-y-3">
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-full"></div>
+                <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+                <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="p-8 max-w-4xl mx-auto space-y-8">
@@ -375,6 +396,24 @@ export function UniversityDetails() {
                   </div>
                 </div>
                 
+                {reportsCount > 0 && (
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-indigo-100 p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-purple-100 text-purple-600 p-2 rounded-lg shrink-0">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-purple-900 flex items-center gap-2 mb-1">
+                          AI Summary
+                          <span className="bg-purple-200 text-purple-700 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold tracking-wider">Coming Soon</span>
+                        </h4>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {reportsCount === 0 ? (
                   <div className="p-12 text-center text-slate-500 flex flex-col items-center">
                     <FileText className="w-12 h-12 text-slate-200 mb-3" />
@@ -382,16 +421,16 @@ export function UniversityDetails() {
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-100">
-                    {details.travelReports?.map((report: any) => (
+                    {details?.travelReports?.map((report: Record<string, unknown>) => (
                       <a
-                        key={report.id}
-                        href={`/api/fetch-pdf?fileId=${report.id}`}
+                        key={report.id as string}
+                        href={`/api/fetch-pdf?fileId=${report.id as string}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-between p-5 hover:bg-sky-50 transition-colors group"
                       >
                         <div className="flex flex-col">
-                          <span className="font-semibold text-slate-800 group-hover:text-sky-700">{report.title}</span>
+                          <span className="font-semibold text-slate-800 group-hover:text-sky-700">{report.title as string}</span>
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <Navigation className="w-3.5 h-3.5 text-sky-500" />
                             <span className="text-xs font-medium text-sky-600">Travel Report</span>
@@ -403,16 +442,16 @@ export function UniversityDetails() {
                       </a>
                     ))}
                     
-                    {details.attachments?.map((doc: any) => (
+                    {details?.attachments?.map((doc: Record<string, unknown>) => (
                       <a
-                        key={doc.id}
-                        href={`/api/fetch-pdf?fileId=${doc.id}`}
+                        key={doc.id as string}
+                        href={`/api/fetch-pdf?fileId=${doc.id as string}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-between p-5 hover:bg-emerald-50 transition-colors group"
                       >
                         <div className="flex flex-col">
-                          <span className="font-semibold text-slate-800 group-hover:text-emerald-700">{doc.title}</span>
+                          <span className="font-semibold text-slate-800 group-hover:text-emerald-700">{doc.title as string}</span>
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <FileText className="w-3.5 h-3.5 text-emerald-500" />
                             <span className="text-xs font-medium text-emerald-600">Fact Sheet / Info</span>

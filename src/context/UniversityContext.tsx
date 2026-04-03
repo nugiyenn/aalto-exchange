@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import Fuse from 'fuse.js';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { University } from '../types/university';
 
 interface UniversityContextProps {
@@ -20,12 +21,43 @@ interface UniversityContextProps {
 const UniversityContext = createContext<UniversityContextProps | undefined>(undefined);
 
 export const UniversityProvider = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const uniParam = searchParams.get('uni');
+
   const [universities, setUniversities] = useState<University[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  
+  // Initialize from URL if present
+  const [selectedUniversityId, setSelectedUniversityIdState] = useState<string | null>(uniParam);
   const [selectedSchool, setSelectedSchool] = useState<string>('');
+
+  // Update URL when selected university changes
+  const setSelectedUniversityId = (id: string | null) => {
+    setSelectedUniversityIdState(id);
+    
+    // Update the URL without a hard reload
+    if (id) {
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set('uni', id);
+      router.push(`/?${newParams.toString()}`, { scroll: false });
+    } else {
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('uni');
+      // If there are no other params, just go to root
+      const paramString = newParams.toString();
+      router.push(paramString ? `/?${paramString}` : '/', { scroll: false });
+    }
+  };
+
+  // Sync state if URL changes (e.g., user hits Back button)
+  useEffect(() => {
+    if (uniParam !== selectedUniversityId) {
+      setSelectedUniversityIdState(uniParam);
+    }
+  }, [uniParam, selectedUniversityId]);
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -42,8 +74,12 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
         }
         const data: University[] = await response.json();
         setUniversities(data);
-      } catch (err: any) {
-        setError(err.message || 'An unknown error occurred');
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message || 'An unknown error occurred');
+        } else {
+          setError('An unknown error occurred');
+        }
       } finally {
         setIsLoading(false);
       }

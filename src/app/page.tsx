@@ -2,11 +2,12 @@
 
 import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, ChevronDown, ChevronRight, Map as MapIcon, Dices } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare } from 'lucide-react';
 import { useUniversityContext } from '../context/UniversityContext';
 import { UniversityCard } from '../components/UniversityCard';
 import { UniversityDetails } from '../components/UniversityDetails';
 import { CaseOpening } from '../components/CaseOpening';
+import { AboutModal } from '../components/AboutModal';
 
 // Dynamically import the big map component with ssr: false to prevent Next.js hydration errors
 const DynamicMap = dynamic(() => import('../components/Map'), {
@@ -31,16 +32,27 @@ export default function Dashboard() {
     setSelectedSchool,
   } = useUniversityContext();
 
-  const [expandedCountries, setExpandedCountries] = useState<Record<string, boolean>>({});
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [sortMethod, setSortMethod] = useState<'country' | 'qs'>('country');
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
 
-  const toggleCountry = (country: string) => {
-    setExpandedCountries(prev => ({
-      ...prev,
-      [country]: !prev[country]
-    }));
-  };
+  // If a user selects a university on mobile, auto-switch to map view to show details
+  React.useEffect(() => {
+    if (selectedUniversityId) {
+      setMobileView('map');
+    } else {
+      setMobileView('list');
+    }
+  }, [selectedUniversityId]);
+
+  // Clear selected country when search query changes to ensure users see filtered flat results if needed
+  React.useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      setSelectedCountry(null);
+    }
+  }, [searchQuery]);
 
   const handleFeelingLucky = () => {
     if (filteredUniversities.length === 0) return;
@@ -51,11 +63,11 @@ export default function Dashboard() {
     setIsSpinning(false);
     setSelectedUniversityId(winnerId);
     
-    // Auto-expand the country accordion so it shows in the list
+    // Auto-select the country so it shows in the drill-down list
     const randomUni = filteredUniversities.find(u => u.core_id === winnerId);
     if (randomUni) {
       const country = randomUni.country_fullname || 'Other';
-      setExpandedCountries(prev => ({ ...prev, [country]: true }));
+      setSelectedCountry(country);
     }
   };
 
@@ -83,16 +95,31 @@ export default function Dashboard() {
           <img src="/aalto-icon.jpg" alt="Aalto University" className="h-10 w-auto object-contain" />
           <span className="text-black">Aalto Exchange</span>
         </div>
-        <div className="text-sm font-medium text-slate-500">
-          Global Discovery Dashboard
+        
+        <div className="flex items-center gap-4 sm:gap-6 text-sm font-semibold text-slate-500">
+          <button 
+            onClick={() => setIsAboutOpen(true)} 
+            className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
+          >
+            <Info className="w-4 h-4" />
+            <span className="hidden sm:inline">About</span>
+          </button>
+          
+          <a 
+            href="mailto:feedback@example.com?subject=Aalto Exchange Feedback" 
+            className="flex items-center gap-1.5 hover:text-slate-900 transition-colors"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span className="hidden sm:inline">Feedback</span>
+          </a>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex flex-1 overflow-hidden">
+      <main className="flex flex-1 overflow-hidden relative">
         
         {/* Left Sidebar - Filters & University List */}
-        <aside className="w-[420px] flex flex-col border-r border-slate-200 bg-white relative z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0">
+        <aside className={`w-full md:w-[420px] flex flex-col border-r border-slate-200 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0 ${mobileView === 'list' ? 'flex z-20 absolute inset-0 md:relative' : 'hidden md:flex relative z-10'}`}>
           
           {/* Prominent Filters Area */}
           <div className="p-5 flex flex-col gap-4 border-b border-slate-100 bg-slate-50/50">
@@ -144,18 +171,18 @@ export default function Dashboard() {
               <span>{isLoading ? 'Loading...' : `${filteredUniversities.length} Destinations Available`}</span>
             </div>
             
-            <div className="flex bg-slate-100 p-1 rounded-md">
+            <div className="flex bg-slate-100 p-1 rounded-md mt-2">
               <button 
                 onClick={() => setSortMethod('country')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-sm transition-all ${sortMethod === 'country' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-sm transition-all ${sortMethod === 'country' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                Group by Country
+                Country
               </button>
               <button 
                 onClick={() => setSortMethod('qs')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-sm transition-all ${sortMethod === 'qs' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-sm transition-all ${sortMethod === 'qs' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}
               >
-                Top QS Ranked
+                QS Rank
               </button>
             </div>
           </div>
@@ -171,38 +198,50 @@ export default function Dashboard() {
                 No universities match your current filters.
               </div>
             ) : sortMethod === 'country' ? (
-              sortedCountries.map(country => {
-                const isExpanded = searchQuery.trim().length > 0 || expandedCountries[country];
-                
-                return (
-                  <div key={country} className="border-b border-slate-200">
-                    <div 
-                      className="sticky top-0 bg-slate-100/95 backdrop-blur px-5 py-3 text-xs font-bold text-slate-700 tracking-wider z-10 flex items-center justify-between cursor-pointer hover:bg-slate-200/50 transition-colors"
-                      onClick={() => toggleCountry(country)}
+              selectedCountry && groupedUniversities[selectedCountry] ? (
+                <div className="bg-white flex flex-col">
+                  <div className="sticky top-0 bg-slate-100/95 backdrop-blur px-5 py-3 border-b border-slate-200 z-10 flex items-center gap-3 shadow-sm">
+                    <button
+                      onClick={() => setSelectedCountry(null)}
+                      className="flex items-center justify-center p-1.5 hover:bg-slate-200 rounded-md transition-colors text-slate-600 active:scale-95"
                     >
-                      <div className="flex items-center gap-2">
-                        {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                        <span className="uppercase">{country}</span>
-                      </div>
-                      <span className="bg-white text-slate-600 px-2 py-0.5 rounded-full font-semibold border border-slate-200 shadow-sm">
-                        {groupedUniversities[country].length}
-                      </span>
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider truncate">{selectedCountry}</h3>
+                      <p className="text-xs text-slate-500 font-medium">{groupedUniversities[selectedCountry].length} Destinations</p>
                     </div>
-                    {isExpanded && (
-                      <div className="bg-white">
-                        {groupedUniversities[country].map((uni, idx) => (
-                          <UniversityCard 
-                            key={`${uni.core_id}-${idx}`} 
-                            university={uni} 
-                            isSelected={selectedUniversityId === uni.core_id}
-                            onClick={() => setSelectedUniversityId(uni.core_id)}
-                          />
-                        ))}
-                      </div>
-                    )}
                   </div>
-                );
-              })
+                  <div className="flex-1 bg-white">
+                    {groupedUniversities[selectedCountry].map((uni, idx) => (
+                      <UniversityCard 
+                        key={`${uni.core_id}-${idx}`} 
+                        university={uni} 
+                        isSelected={selectedUniversityId === uni.core_id}
+                        onClick={() => setSelectedUniversityId(uni.core_id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white">
+                  {sortedCountries.map(country => (
+                    <div 
+                      key={country} 
+                      className="border-b border-slate-200 flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-slate-50 transition-colors group"
+                      onClick={() => setSelectedCountry(country)}
+                    >
+                      <span className="text-sm font-bold text-slate-700 uppercase tracking-wider group-hover:text-blue-700 transition-colors">{country}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full text-xs font-semibold border border-slate-200 shadow-sm group-hover:bg-blue-50 group-hover:text-blue-700 group-hover:border-blue-200 transition-colors">
+                          {groupedUniversities[country].length}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="bg-white">
                 {[...filteredUniversities].sort((a, b) => a.qsRank - b.qsRank).map((uni, idx) => (
@@ -219,8 +258,8 @@ export default function Dashboard() {
         </aside>
 
         {/* Right Panel - Details Profile or Big Map with floating padding */}
-        <section className="flex-1 bg-slate-100 p-4 sm:p-6 overflow-hidden">
-          <div className="w-full h-full rounded-2xl shadow-sm border border-slate-200 bg-white overflow-hidden relative">
+        <section className={`flex-1 bg-slate-100 p-0 sm:p-6 overflow-hidden ${mobileView === 'map' ? 'flex absolute inset-0 z-20 sm:relative' : 'hidden sm:flex relative z-10'}`}>
+          <div className="w-full h-full sm:rounded-2xl shadow-sm sm:border border-slate-200 bg-white overflow-hidden relative">
             {selectedUniversityId ? (
               <UniversityDetails />
             ) : (
@@ -228,6 +267,26 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+
+        {/* Mobile Toggle Button */}
+        <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]">
+          <button
+            onClick={() => setMobileView(mobileView === 'list' ? 'map' : 'list')}
+            className="flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900 text-white shadow-xl font-bold text-sm hover:bg-slate-800 transition-all active:scale-95"
+          >
+            {mobileView === 'list' ? (
+              <>
+                <MapIcon className="w-4 h-4" />
+                Show Map
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4" />
+                Show List
+              </>
+            )}
+          </button>
+        </div>
 
       </main>
 
@@ -239,6 +298,9 @@ export default function Dashboard() {
           onClose={() => setIsSpinning(false)}
         />
       )}
+
+      {/* About / Disclaimer Modal */}
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </div>
   );
 }

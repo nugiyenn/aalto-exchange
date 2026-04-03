@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, MapPin, GraduationCap } from 'lucide-react';
+import { Trophy, MapPin } from 'lucide-react';
 import { University } from '../types/university';
 
 interface UniversityCardProps {
@@ -9,7 +9,7 @@ interface UniversityCardProps {
 }
 
 export function UniversityCard({ university, isSelected = false, onClick }: UniversityCardProps) {
-  const { universityname, country, qsRank, gpaReq, studyOpportunity } = university;
+  const { universityname, country, qsRank, studyOpportunity } = university;
   
   // Format study opportunity (e.g., "Erasmus: Universiteit Twente - SCI (IEM)" -> "Erasmus: SCI (IEM)")
   const formatStudyOpp = (opp: string | null, uniName: string) => {
@@ -37,14 +37,16 @@ export function UniversityCard({ university, isSelected = false, onClick }: Univ
       `}
     >
       <div className="flex justify-between items-start gap-2">
-        <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">
-          {universityname}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-slate-800 text-sm leading-snug">
+            {universityname}
+          </h3>
           {formattedOpp && (
-            <span className="block text-xs font-medium text-slate-500 mt-1">
+            <div className="text-xs font-medium text-slate-500 mt-1.5 leading-snug">
               {formattedOpp}
-            </span>
+            </div>
           )}
-        </h3>
+        </div>
         {qsRank !== 999 && (
           <div className="flex items-center gap-1 bg-amber-100/80 text-amber-700 px-2 py-1 rounded-md text-xs font-semibold shrink-0 border border-amber-200/50">
             <Trophy className="w-3 h-3 text-amber-500" />
@@ -53,28 +55,18 @@ export function UniversityCard({ university, isSelected = false, onClick }: Univ
         )}
       </div>
       
-      <div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
-        <div className="flex items-center gap-1 text-slate-500 mr-1">
-          <MapPin className="w-3.5 h-3.5 text-rose-400" />
-          {/* We remove country_fullname here since the sidebar itself will be grouped by country */}
-          <span className="font-medium">{universityname.split(',')[0]}</span>
-          <span className="bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded text-[10px] ml-0.5 font-bold border border-sky-200">
-            {country}
-          </span>
+      <div className="mt-3 flex items-center text-xs">
+        <div className="flex items-start gap-1.5 text-slate-500">
+          <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+          <div className="font-medium leading-snug flex flex-wrap items-center gap-1.5">
+            <span>{universityname.split(',')[0]}</span>
+            <span className="bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded text-[10px] font-bold border border-sky-200 shrink-0">
+              {country}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Colorful Badges for Requirements */}
-      <div className="mt-3 flex items-center justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          {gpaReq && (
-            <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200/60 px-1.5 py-0.5 rounded-md text-[10px] font-medium" title="GPA Requirement">
-              <GraduationCap className="w-3 h-3 text-emerald-500" />
-              {gpaReq}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

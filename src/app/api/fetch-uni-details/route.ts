@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const institutionsRaw = uni.informatics?.[0]?.institutions || [];
     
     // Some endpoints have 'travelreports' in the same informatics[0] block
-    const travelreportsRaw = (uni.informatics?.[0] as any)?.travelreports || [];
+    const travelreportsRaw = (uni.informatics?.[0] as Record<string, unknown>)?.travelreports || [];
 
     const relations: RawRelation[] = Array.isArray(relationsRaw) 
       ? relationsRaw 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       ? institutionsRaw
       : Object.values(institutionsRaw);
 
-    const travelreports: any[] = Array.isArray(travelreportsRaw)
+    const travelreports: unknown[] = Array.isArray(travelreportsRaw)
       ? travelreportsRaw
       : Object.values(travelreportsRaw);
 
@@ -72,10 +72,10 @@ export async function POST(request: Request) {
     });
 
     // Extract travel reports cleanly
-    const parsedTravelReports = travelreports.map((trArray: any) => {
-      const item = Array.isArray(trArray) ? trArray[0] : Object.values(trArray)[0];
-      if (item && (item as any).fullname) {
-        const fullname = (item as any).fullname;
+    const parsedTravelReports = travelreports.map((trArray: unknown) => {
+      const item = Array.isArray(trArray) ? trArray[0] : Object.values(trArray as object)[0];
+      if (item && (item as Record<string, unknown>).fullname) {
+        const fullname = (item as Record<string, unknown>).fullname as string;
         // Parse out data-id and title from anchor tag
         const match = fullname.match(/data-id=['"](\d+)['"].*>(.*?)</);
         if (match) {

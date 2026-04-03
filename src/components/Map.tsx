@@ -27,11 +27,11 @@ export default function Map() {
       className="h-full w-full bg-sky-50 z-0 relative"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
 
-      {filteredUniversities.map((uni) => {
+      {filteredUniversities.map((uni, idx) => {
         const lat = parseFloat(uni.latitude);
         const lng = parseFloat(uni.longitude);
 
@@ -39,17 +39,42 @@ export default function Map() {
 
         return (
           <Marker
-            key={uni.core_id}
+            key={`${uni.core_id}-${uni.relation_id || idx}`}
             position={[lat, lng]}
             icon={customIcon}
             eventHandlers={{
               click: () => {
-                setSelectedUniversityId(uni.core_id);
+                // Do not auto-select the university here anymore
               },
             }}
           >
-            <Popup className="text-slate-900 font-medium text-xs">
-              {uni.universityname}
+            <Popup className="text-slate-900 font-medium">
+              <div className="flex flex-col gap-2 p-1 min-w-[200px]">
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm text-slate-800 leading-tight">
+                    {uni.universityname}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium mt-0.5">
+                    {uni.country_fullname || uni.country}
+                  </span>
+                </div>
+                
+                {uni.qsRank && uni.qsRank !== 999 && (
+                  <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded text-[10px] font-bold w-fit border border-amber-200">
+                    QS Rank: #{uni.qsRank}
+                  </div>
+                )}
+                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedUniversityId(uni.core_id);
+                  }}
+                  className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 rounded transition-colors"
+                >
+                  View Details
+                </button>
+              </div>
             </Popup>
           </Marker>
         );

@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { UniversityProvider } from "../context/UniversityContext";
+import { Analytics } from "@vercel/analytics/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-slate-100 text-slate-900`}
     >
       <body className="min-h-full flex flex-col m-0 p-0">
-        <UniversityProvider>{children}</UniversityProvider>
+        <Suspense fallback={<div className="h-full flex items-center justify-center">Loading Data...</div>}>
+          <UniversityProvider>{children}</UniversityProvider>
+        </Suspense>
+        <Analytics />
       </body>
     </html>
   );

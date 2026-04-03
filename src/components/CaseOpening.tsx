@@ -12,7 +12,6 @@ interface CaseOpeningProps {
 
 export function CaseOpening({ universities, onComplete, onClose }: CaseOpeningProps) {
   const [items, setItems] = useState<University[]>([]);
-  const [winner, setWinner] = useState<University | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [finalOffset, setFinalOffset] = useState(0);
 
@@ -45,9 +44,9 @@ export function CaseOpening({ universities, onComplete, onClose }: CaseOpeningPr
     const actualWinner = universities[Math.floor(Math.random() * universities.length)];
     newItems[WINNER_INDEX] = actualWinner;
     
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(newItems);
-    setWinner(actualWinner);
-
+    
     // Calculate exact offset to land on the winner
     // We want the center of the winner item to align with the center line (left: 50%)
     // Since the track starts at left: 50%, a transform of 0 means the LEFT edge of item 0 is at the center line.

@@ -25,13 +25,13 @@ export default function MiniMap({ lat, lng, name }: { lat: number; lng: number; 
     <MapContainer
       center={[lat, lng]}
       zoom={5}
-      scrollWheelZoom={false}
-      zoomControl={false}
+      scrollWheelZoom={true}
+      zoomControl={true}
       className="h-full w-full z-0 relative"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
       <Marker position={[lat, lng]} icon={customIcon}>
         <Popup className="text-slate-900 font-medium text-xs">
