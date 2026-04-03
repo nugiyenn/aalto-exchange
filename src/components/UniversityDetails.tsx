@@ -13,7 +13,21 @@ const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
 );
 
 const UNIVERSITY_ALIASES: Record<string, string> = {
-  "Institute of Science Tokyo": "Tokyo Institute of Technology"
+  "Institute of Science Tokyo": "Tokyo Institute of Technology",
+  "Ceské Vysoké Uceni Technické v Praze": "Czech Technical University (CTU) in Prague",
+  "Vysoké Ucení Technické v Brne": "Brno University of Technology",
+  "University of Chemistry and Technology, Prague": "Vysoká Skola Chemicko-Technologická v Praze (UCT Prague)",
+  "IE Universidad": "IE Business School (Instituto de Empresa)",
+  "Universitat Politècnica de València": "Universidad Politécnica de Valencia",
+  "Texas A&M University": "Texas A & M University"
+};
+
+const normalizeName = (name: string) => {
+  if (!name) return "";
+  return name.replace(/[\u2010-\u2015\-]/g, '-')
+             .replace(/['"“”]/g, "'")
+             .replace(/\s+/g, " ")
+             .toLowerCase();
 };
 
 export function UniversityDetails() {
@@ -70,13 +84,14 @@ export function UniversityDetails() {
     
     // Check if we have an alias for this university name, else use the default
     const originalName = baseUni.universityname;
-    const searchName = UNIVERSITY_ALIASES[originalName] || originalName;
+    const rawSearchName = UNIVERSITY_ALIASES[originalName] || originalName;
+    const searchName = normalizeName(rawSearchName);
     
     // First, try exact or simple inclusion
-    let match = techStats.find(stat => 
-      searchName.toLowerCase().includes(stat.university_name.toLowerCase()) || 
-      stat.university_name.toLowerCase().includes(searchName.toLowerCase())
-    );
+    let match = techStats.find(stat => {
+      const statName = normalizeName(stat.university_name);
+      return searchName.includes(statName) || statName.includes(searchName);
+    });
 
     if (match) return match;
 
@@ -88,7 +103,7 @@ export function UniversityDetails() {
       minMatchCharLength: 5,
     });
 
-    const results = fuse.search(searchName);
+    const results = fuse.search(rawSearchName);
     if (results.length > 0) {
       return results[0].item;
     }
