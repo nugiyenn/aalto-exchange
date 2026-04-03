@@ -4,6 +4,13 @@ A modern frontend for Aalto University's MoveON exchange database.
 
 This project replaces the legacy UI with a high-performance discovery dashboard, helping Aalto students find their exchange destinations quickly and easily.
 
+## Motivation
+
+I wanted a faster and cleaner alternative to official exchange database.
+I wanted randomized (implemented as feeling lucky)
+I wanted to add QS ranking
+I wanted to add previous application statistics such as  academic index and number of applicants 
+
 ## Features
 
 * Fast Search: Client-side fuzzy matching across universities, countries, and cities.
@@ -29,6 +36,14 @@ This project replaces the legacy UI with a high-performance discovery dashboard,
 * Node.js (v18 or higher)
 * npm
 
+## Motivation
+
+The official exchange database is a bottleneck. It is slow and lacks the specific metrics students actually prioritize. This project provides a faster, modern alternative to streamline the discovery and application process.
+
+* **Enriched Data:** Integrated QS World Rankings and historical application statistics (Academic Index and applicant counts).
+* **Serendipitous Discovery:** An "I'm Feeling Lucky" randomizer to help explore high-quality destinations beyond the usual choices.
+* **Refined UX:** A high-performance interface where travel reports open in the browser instead of forcing automatic downloads.
+
 ### Installation
 
 1. Clone the repository:
@@ -49,11 +64,3 @@ This project replaces the legacy UI with a high-performance discovery dashboard,
 
 4. Open the application:
    Navigate to http://localhost:3000 in your web browser.
-
-## Deployment
-
-This project is built with Next.js and is optimized for deployment on Vercel.
-
-1. Push your code to GitHub.
-2. Log in to Vercel and create a new project.
-3. Import your repository and click Deploy.
