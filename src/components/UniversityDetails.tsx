@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUniversityContext } from '../context/UniversityContext';
-import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info } from 'lucide-react';
+import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users } from 'lucide-react';
+import techStats from '../data/tech-statistics.json';
 import dynamic from 'next/dynamic';
 
 const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
@@ -56,6 +57,14 @@ export function UniversityDetails() {
       </div>
     );
   }
+
+  // Find matching tech stats if available
+  const searchName = baseUni.universityname.toLowerCase();
+  // Direct match or partial match
+  const techStat = techStats.find(stat => 
+    searchName.includes(stat.university_name.toLowerCase()) || 
+    stat.university_name.toLowerCase().includes(searchName)
+  );
 
   // Parse details map
   const info = details?.details || {};
@@ -158,7 +167,7 @@ export function UniversityDetails() {
             
             {activeTab === 'overview' && (
               <>
-                {/* High Level Map & Quick Facts Grid */}
+            {/* High Level Map & Quick Facts Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-64 relative">
                  <DynamicMiniMap lat={parseFloat(baseUni.latitude)} lng={parseFloat(baseUni.longitude)} name={baseUni.universityname} />
@@ -185,6 +194,66 @@ export function UniversityDetails() {
                  )}
               </div>
             </div>
+
+            {/* Historical Tech Stats */}
+            {techStat && (
+              <section className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-indigo-500" />
+                  Historical Tech Applications (AY2022-2025)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-sm font-semibold text-indigo-800 mb-3 flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-indigo-400" />
+                      Applicant Breakdown (AY2025)
+                    </h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                        <span className="text-sm text-indigo-700">1st Choice</span>
+                        <span className="font-bold text-indigo-900">{techStat.applicants_1st}</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                        <span className="text-sm text-indigo-700">2nd Choice</span>
+                        <span className="font-bold text-indigo-900">{techStat.applicants_2nd}</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                        <span className="text-sm text-indigo-700">3rd Choice</span>
+                        <span className="font-bold text-indigo-900">{techStat.applicants_3rd}</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-indigo-100 px-3 py-2 rounded-lg border border-indigo-200">
+                        <span className="text-sm font-bold text-indigo-800">Total Applicants</span>
+                        <span className="font-bold text-indigo-900">{techStat.applicants_total}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-indigo-800 mb-3 flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-indigo-400" />
+                      Lowest Accepted Academic Index
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-white/60 p-3 rounded-lg text-center">
+                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2025</p>
+                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2025 !== '-' ? techStat.index_2025 : 'N/A'}</p>
+                      </div>
+                      <div className="bg-white/60 p-3 rounded-lg text-center">
+                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2024</p>
+                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2024 !== '-' ? techStat.index_2024 : 'N/A'}</p>
+                      </div>
+                      <div className="bg-white/60 p-3 rounded-lg text-center">
+                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2023</p>
+                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2023 !== '-' ? techStat.index_2023 : 'N/A'}</p>
+                      </div>
+                      <div className="bg-white/60 p-3 rounded-lg text-center">
+                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2022</p>
+                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2022 !== '-' ? techStat.index_2022 : 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* In Brief / Description */}
             {info['In brief'] && (
