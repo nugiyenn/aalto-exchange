@@ -12,6 +12,10 @@ const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
   { ssr: false }
 );
 
+const UNIVERSITY_ALIASES: Record<string, string> = {
+  "Institute of Science Tokyo": "Tokyo Institute of Technology"
+};
+
 export function UniversityDetails() {
   const { selectedUniversityId, setSelectedUniversityId, universities } = useUniversityContext();
   const [details, setDetails] = useState<any>(null);
@@ -64,7 +68,9 @@ export function UniversityDetails() {
   const getTechStat = () => {
     if (!baseUni) return null;
     
-    const searchName = baseUni.universityname;
+    // Check if we have an alias for this university name, else use the default
+    const originalName = baseUni.universityname;
+    const searchName = UNIVERSITY_ALIASES[originalName] || originalName;
     
     // First, try exact or simple inclusion
     let match = techStats.find(stat => 
@@ -77,7 +83,7 @@ export function UniversityDetails() {
     // Fallback to fuzzy matching if exact inclusion fails
     const fuse = new Fuse(techStats, {
       keys: ['university_name', 'original_name'],
-      threshold: 0.3, // fairly strict to avoid wrong matches
+      threshold: 0.15, // tightened to avoid false positive matches like 'Institute of Science'
       ignoreLocation: true,
       minMatchCharLength: 5,
     });
