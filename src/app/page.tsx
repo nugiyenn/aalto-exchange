@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare, List as ListIcon, Heart, Share2, Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare, List as ListIcon, Heart } from 'lucide-react';
 import { useUniversityContext } from '../context/UniversityContext';
 import { UniversityCard } from '../components/UniversityCard';
 import { UniversityDetails } from '../components/UniversityDetails';
@@ -35,7 +36,6 @@ export default function Dashboard() {
     selectedRegion,
     setSelectedRegion,
     shortlist,
-    removeFromShortlist,
   } = useUniversityContext();
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -109,7 +109,7 @@ export default function Dashboard() {
       {/* Top Navigation / Control Bar */}
       <header className="h-16 flex items-center justify-between px-6 border-b border-slate-200 shrink-0 bg-white z-20 shadow-sm">
         <div className="flex items-center gap-4 font-bold text-xl tracking-tight cursor-pointer" onClick={() => setSelectedUniversityId(null)}>
-          <img src="/aalto-icon.jpg" alt="Aalto University" className="h-10 w-auto object-contain" />
+          <Image src="/aalto-icon.jpg" alt="Aalto University" className="h-10 w-auto object-contain" width={40} height={40} />
           <span className="text-black">Aalto Exchange</span>
         </div>
         

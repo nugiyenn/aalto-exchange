@@ -143,6 +143,7 @@ export const UniversityProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setSelectedUniversityId(null); // Clear selection when school changes
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSchool]);
 
   // Initialize Fuse instance when universities load

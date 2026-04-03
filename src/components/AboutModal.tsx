@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, AlertTriangle, ShieldAlert } from 'lucide-react';
+import { X, ShieldAlert } from 'lucide-react';
 
 interface AboutModalProps {
   isOpen: boolean;
