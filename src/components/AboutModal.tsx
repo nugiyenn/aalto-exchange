@@ -31,7 +31,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
         
         <div className="p-6 space-y-5 text-sm text-slate-600 leading-relaxed">
           <p>
-            <strong className="text-slate-900">Aalto Exchange</strong> is an unofficial, modern discovery dashboard built on top of Aalto University's MoveON database. 
+            <strong className="text-slate-900">Aalto Exchange</strong> is an unofficial, modern discovery dashboard built on top of Aalto University&apos;s MoveON database. 
             It is designed to make finding your ideal exchange destination dramatically faster, easier, and more insightful.
           </p>
 

@@ -55,7 +55,7 @@ export function ShortlistModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
               </div>
               <h3 className="text-lg font-bold text-slate-700">Your shortlist is empty</h3>
               <p className="text-slate-500 text-sm mt-2">
-                Browse destinations and click the "Add to Shortlist" button to build your top 3 tier list.
+                Browse destinations and click the &quot;Add to Shortlist&quot; button to build your top 3 tier list.
               </p>
             </div>
           ) : (
