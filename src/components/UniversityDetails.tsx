@@ -5,6 +5,7 @@ import { useUniversityContext } from '../context/UniversityContext';
 import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users } from 'lucide-react';
 import techStats from '../data/tech-statistics.json';
 import dynamic from 'next/dynamic';
+import Fuse from 'fuse.js';
 
 const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
   () => import('./MiniMap'), 
@@ -59,12 +60,37 @@ export function UniversityDetails() {
   }
 
   // Find matching tech stats if available
-  const searchName = baseUni.universityname.toLowerCase();
   // Direct match or partial match
-  const techStat = techStats.find(stat => 
-    searchName.includes(stat.university_name.toLowerCase()) || 
-    stat.university_name.toLowerCase().includes(searchName)
-  );
+  const getTechStat = () => {
+    if (!baseUni) return null;
+    
+    const searchName = baseUni.universityname;
+    
+    // First, try exact or simple inclusion
+    let match = techStats.find(stat => 
+      searchName.toLowerCase().includes(stat.university_name.toLowerCase()) || 
+      stat.university_name.toLowerCase().includes(searchName.toLowerCase())
+    );
+
+    if (match) return match;
+
+    // Fallback to fuzzy matching if exact inclusion fails
+    const fuse = new Fuse(techStats, {
+      keys: ['university_name', 'original_name'],
+      threshold: 0.3, // fairly strict to avoid wrong matches
+      ignoreLocation: true,
+      minMatchCharLength: 5,
+    });
+
+    const results = fuse.search(searchName);
+    if (results.length > 0) {
+      return results[0].item;
+    }
+
+    return null;
+  };
+
+  const techStat = getTechStat();
 
   // Parse details map
   const info = details?.details || {};
