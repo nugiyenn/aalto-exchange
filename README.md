@@ -6,10 +6,11 @@ This project replaces the legacy UI with a high-performance discovery dashboard,
 
 ## Motivation
 
-I wanted a faster and cleaner alternative to official exchange database.
-I wanted randomized (implemented as feeling lucky)
-I wanted to add QS ranking
-I wanted to add previous application statistics such as  academic index and number of applicants 
+The official exchange database is a bottleneck. It is slow and lacks the specific metrics students actually prioritize. This project provides a faster, modern alternative to streamline the discovery and application process.
+
+* **Enriched Data:** Integrated QS World Rankings and historical application statistics (Academic Index and applicant counts).
+* **Serendipitous Discovery:** An "I'm Feeling Lucky" randomizer to help explore high-quality destinations beyond the usual choices.
+* **Refined UX:** A high-performance interface where travel reports open in the browser instead of forcing automatic downloads.
 
 ## Features
 
@@ -35,14 +36,6 @@ I wanted to add previous application statistics such as  academic index and numb
 
 * Node.js (v18 or higher)
 * npm
-
-## Motivation
-
-The official exchange database is a bottleneck. It is slow and lacks the specific metrics students actually prioritize. This project provides a faster, modern alternative to streamline the discovery and application process.
-
-* **Enriched Data:** Integrated QS World Rankings and historical application statistics (Academic Index and applicant counts).
-* **Serendipitous Discovery:** An "I'm Feeling Lucky" randomizer to help explore high-quality destinations beyond the usual choices.
-* **Refined UX:** A high-performance interface where travel reports open in the browser instead of forcing automatic downloads.
 
 ### Installation
 
