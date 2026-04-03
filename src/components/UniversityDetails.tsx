@@ -111,7 +111,16 @@ export function UniversityDetails() {
     return null;
   };
 
-  const techStat = getTechStat();
+  const techStat = getTechStat() || {
+    applicants_1st: '-',
+    applicants_2nd: '-',
+    applicants_3rd: '-',
+    applicants_total: '-',
+    index_2025: '-',
+    index_2024: '-',
+    index_2023: '-',
+    index_2022: '-'
+  };
 
   // Parse details map
   const info = details?.details || {};
