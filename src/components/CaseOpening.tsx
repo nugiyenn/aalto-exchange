@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { University } from '../types/university';
-import Image from 'next/image';
 import { Trophy, MapPin, X } from 'lucide-react';
 
 interface CaseOpeningProps {
@@ -130,18 +129,17 @@ export function CaseOpening({ universities, onComplete, onClose }: CaseOpeningPr
                     <div className="absolute top-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
                     
                     {/* Country Flag Background watermark */}
-                    <Image 
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
                       src={`https://flagcdn.com/w160/${uni.country.toLowerCase()}.png`} 
                       alt="" 
-                      fill
                       className="absolute inset-0 w-full h-full object-cover opacity-10 filter blur-[2px] pointer-events-none"
                     />
 
-                    <Image 
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
                       src={`https://flagcdn.com/w80/${uni.country.toLowerCase()}.png`} 
                       alt={uni.country}
-                      width={40}
-                      height={27}
                       className="w-10 h-auto rounded shadow-sm border border-white/20 mb-3 z-10"
                     />
                     
