@@ -192,7 +192,7 @@ export function UniversityDetails() {
                     <BookOpen className="w-5 h-5 text-indigo-500" />
                     {key}
                   </h3>
-                  <div className="prose prose-sm prose-slate max-w-none text-slate-600" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, '<br />') }} />
+                  <div className="prose prose-sm prose-slate max-w-none text-slate-600 prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, '<br />') }} />
                 </section>
               );
             })}
