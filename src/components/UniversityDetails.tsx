@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUniversityContext } from '../context/UniversityContext';
-import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation } from 'lucide-react';
+import { Trophy, MapPin, X, Globe2, BookOpen, CalendarDays, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const DynamicMiniMap = dynamic<{ lat: number; lng: number; name: string }>(
@@ -60,6 +60,29 @@ export function UniversityDetails() {
   // Parse details map
   const info = details?.details || {};
   const reportsCount = (details?.travelReports?.length || 0) + (details?.attachments?.length || 0);
+
+  const shortFacts: {key: string, value: string}[] = [];
+  const longSections: {key: string, value: string}[] = [];
+
+  Object.entries(info).forEach(([key, value]) => {
+    if (
+      ['In brief', 'Data protection', 'Language of Instruction', 'Study level', 'Places available', 'Open for applications (active)'].includes(key)
+    ) {
+      return;
+    }
+    // Skip empty values or 'null' strings
+    if (!value || typeof value !== 'string' || value.trim() === '' || value === 'null') {
+      return;
+    }
+
+    const stripped = value.replace(/<[^>]+>/g, '').trim();
+    // If it's short and has no complex HTML (like lists or multiple paragraphs)
+    if (stripped.length < 150 && !value.includes('</li>') && !value.includes('</p><p>')) {
+      shortFacts.push({ key, value });
+    } else {
+      longSections.push({ key, value });
+    }
+  });
 
   return (
     <div className="h-full w-full bg-white flex flex-col relative shadow-inner overflow-hidden">
@@ -175,27 +198,32 @@ export function UniversityDetails() {
             )}
 
                 {/* Dynamic Additional Sections */}
-            {Object.entries(info).map(([key, value]) => {
-              if (
-                ['In brief', 'Data protection', 'Language of Instruction', 'Study level', 'Places available', 'Open for applications (active)'].includes(key)
-              ) {
-                return null;
-              }
-              // Skip empty values or 'null' strings
-              if (!value || typeof value !== 'string' || value.trim() === '' || value === 'null') {
-                return null;
-              }
+            {shortFacts.length > 0 && (
+              <section className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-5 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-indigo-500" />
+                  Quick Info
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {shortFacts.map(({ key, value }) => (
+                    <div key={key}>
+                      <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">{key}</p>
+                      <div className="text-sm text-slate-800 font-medium [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 break-words" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, ', ') }} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              return (
-                <section key={key} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-indigo-500" />
-                    {key}
-                  </h3>
-                  <div className="prose prose-sm prose-slate max-w-none text-slate-600 [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, '<br />') }} />
-                </section>
-              );
-            })}
+            {longSections.map(({ key, value }) => (
+              <section key={key} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-indigo-500" />
+                  {key}
+                </h3>
+                <div className="prose prose-sm prose-slate max-w-none text-slate-600 [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, '<br />') }} />
+              </section>
+            ))}
 
             {/* Data Protection Warning */}
                 {info['Data protection'] && (
