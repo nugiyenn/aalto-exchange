@@ -4,6 +4,12 @@ A modern frontend for Aalto University's MoveON exchange database.
 
 This project replaces the legacy UI with a high-performance discovery dashboard, helping Aalto students find their exchange destinations quickly and easily.
 
+## Motivation
+
+Navigating the official Aalto University exchange database can be a slow and frustrating process. I built this dashboard to provide a lightning-fast, modern alternative that drastically reduces the friction of finding the perfect exchange destination. 
+
+Beyond just a UI facelift, I wanted to enrich the decision-making process by integrating critical data that the official portal lacks. By adding global prestige indicators (QS World University Rankings) and historical application statistics (academic index thresholds and applicant volumes), students can accurately gauge their chances of acceptance and make data-driven choices. Finally, to combat choice paralysis among hundreds of global destinations, I added a gamified "I'm Feeling Lucky" feature to help students discover hidden gems they might have otherwise overlooked.
+
 ## Features
 
 * Fast Search: Client-side fuzzy matching across universities, countries, and cities.
@@ -49,11 +55,3 @@ This project replaces the legacy UI with a high-performance discovery dashboard,
 
 4. Open the application:
    Navigate to http://localhost:3000 in your web browser.
-
-## Deployment
-
-This project is built with Next.js and is optimized for deployment on Vercel.
-
-1. Push your code to GitHub.
-2. Log in to Vercel and create a new project.
-3. Import your repository and click Deploy.
