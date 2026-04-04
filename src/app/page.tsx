@@ -189,7 +189,7 @@ export default function Dashboard() {
                     className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-3 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black text-slate-900 font-medium shadow-sm appearance-none cursor-pointer"
                   >
                     <option value="">All Schools</option>
-                    <option value="1">CHEM</option>
+                    <option value="6">CHEM</option>
                     <option value="2">SCI</option>
                     <option value="3">ENG</option>
                     <option value="4">ELEC</option>
