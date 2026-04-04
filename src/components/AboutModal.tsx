@@ -31,8 +31,8 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
         
         <div className="p-6 space-y-5 text-sm text-slate-600 leading-relaxed">
           <p>
-            <strong className="text-slate-900">Aalto Exchange</strong> is an unofficial, modern discovery dashboard built on top of Aalto University&apos;s MoveON database. 
-            It is designed to make finding your ideal exchange destination dramatically faster, easier, and more insightful.
+            Aalto Exchange is an unofficial discovery dashboard built on top of Aalto University&apos;s MoveON database. 
+            It is designed to make finding your ideal exchange destination easier and more insightful.
           </p>
 
           <div className="space-y-2">
@@ -49,7 +49,7 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-amber-800 mt-6">
             <ShieldAlert className="w-6 h-6 text-amber-600 shrink-0" />
             <div className="space-y-1">
-              <h4 className="font-bold text-amber-900">Important Disclaimer</h4>
+              <h4 className="font-bold text-amber-900">Disclaimer</h4>
               <p className="text-xs">
                 This project is <strong>not officially affiliated</strong> with or endorsed by Aalto University. 
                 While it synchronizes with the official MoveON database, parsing errors may occur. Always verify your eligibility, language requirements, and application deadlines on the official Aalto MoveON portal before applying.
