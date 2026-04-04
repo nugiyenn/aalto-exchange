@@ -33,4 +33,5 @@ export interface University extends RawUniversity {
   languageReq: string | null;
   ectsReq: string | null;
   studyOpportunity: string | null;
+  variants?: { relation_id: string, studyOpportunity: string | null, gpaReq: string | null, languageReq: string | null, ectsReq: string | null }[];
 }

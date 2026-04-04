@@ -21,7 +21,9 @@ export function parseInBrief(html: string): { gpaReq: string | null; languageReq
 }
 
 export function enrichUniversityData(data: RawUniversity[]): University[] {
-  return data.map((uni) => {
+  const groupedUniversities = new Map<string, University>();
+
+  data.forEach((uni) => {
     // Find the 'In brief' relation text
     let inBriefHtml = '';
     let studyOpportunityHtml = '';
@@ -30,7 +32,7 @@ export function enrichUniversityData(data: RawUniversity[]): University[] {
       // Need to handle when relations is an object instead of array (MoveON API quirk)
       let relations = uni.informatics[0].relations || [];
       if (!Array.isArray(relations)) {
-        relations = Object.values(relations);
+        relations = Object.values(relations) as RawRelation[];
       }
       
       const inBriefRel = relations.find((r: RawRelation) => r.shortname === 'In brief');
@@ -52,16 +54,37 @@ export function enrichUniversityData(data: RawUniversity[]): University[] {
 
     const { gpaReq, languageReq, ectsReq } = parseInBrief(inBriefHtml);
 
-    // Match QS Rank (or fallback to 999)
-    const qsRank = RANKINGS[uni.universityname] ?? 999;
-
-    return {
-      ...uni,
-      qsRank,
-      gpaReq,
-      languageReq,
-      ectsReq,
-      studyOpportunity,
-    };
+    if (groupedUniversities.has(uni.core_id)) {
+      const existing = groupedUniversities.get(uni.core_id)!;
+      existing.variants = existing.variants || [];
+      existing.variants.push({
+        relation_id: uni.relation_id,
+        studyOpportunity,
+        gpaReq,
+        languageReq,
+        ectsReq
+      });
+    } else {
+      // Match QS Rank (or fallback to 999)
+      const qsRank = RANKINGS[uni.universityname] ?? 999;
+      
+      groupedUniversities.set(uni.core_id, {
+        ...uni,
+        qsRank,
+        gpaReq,
+        languageReq,
+        ectsReq,
+        studyOpportunity,
+        variants: [{
+          relation_id: uni.relation_id,
+          studyOpportunity,
+          gpaReq,
+          languageReq,
+          ectsReq
+        }]
+      });
+    }
   });
+
+  return Array.from(groupedUniversities.values());
 }
