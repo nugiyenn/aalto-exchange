@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aalto Exchange Dashboard",
-  description: "Shadow Frontend for Aalto University's MoveON exchange database",
+  title: "Aalto Exchange",
+  description: "The better exchange destination explorer for Aalto University students.",
 };
 
 export default function RootLayout({
