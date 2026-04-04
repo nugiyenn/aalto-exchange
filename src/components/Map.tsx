@@ -11,18 +11,23 @@ import { useUniversityContext } from '../context/UniversityContext';
 import { getCostTier } from '../lib/cost';
 
 // Function to create color-coded icon
-const createCustomIcon = (color: string) => {
+const createCustomIcon = (tier: number | null) => {
+  let bgColor = '#64748b'; // slate-500 (default)
+  
+  if (tier === 1) bgColor = '#10b981'; // emerald-500
+  if (tier === 2) bgColor = '#eab308'; // yellow-500
+  if (tier === 3) bgColor = '#f97316'; // orange-500
+  if (tier === 4) bgColor = '#f43f5e'; // rose-500
+
   return L.divIcon({
-    html: `<div style="background-color: ${color}; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>`,
+    html: `<div style="background-color: ${bgColor}; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 4px ${bgColor}40, 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>`,
     className: 'custom-marker-icon', // Removed default styling
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
-    popupAnchor: [0, -11],
-    tooltipAnchor: [11, 0],
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+    popupAnchor: [0, -7],
+    tooltipAnchor: [7, 0],
   });
 };
-
-const DEFAULT_COLOR = '#94a3b8'; // slate-400
 
 export default function Map() {
   const { filteredUniversities, setSelectedUniversityId } = useUniversityContext();
@@ -54,8 +59,7 @@ export default function Map() {
           // Determine marker color based on Cost Tier
           const countryName = uni.country_fullname || uni.country;
           const costTier = getCostTier(countryName || '', uni.universityname || '');
-          const markerColor = costTier ? costTier.color : DEFAULT_COLOR;
-          const icon = createCustomIcon(markerColor);
+          const icon = createCustomIcon(costTier ? costTier.tier : null);
 
           return (
             <Marker
