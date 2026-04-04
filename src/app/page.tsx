@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare, List as ListIcon, Heart } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, ChevronLeft, Map as MapIcon, Dices, Info, MessageSquare, List as ListIcon, Heart, AlertTriangle } from 'lucide-react';
 import { useUniversityContext } from '../context/UniversityContext';
 import { UniversityCard } from '../components/UniversityCard';
 import { UniversityDetails } from '../components/UniversityDetails';
@@ -45,6 +45,7 @@ export default function Dashboard() {
   const [isShortlistOpen, setIsShortlistOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'map'>('list');
   const [rightPaneView, setRightPaneView] = useState<'map' | 'directory'>('map');
+  const [isDisclaimerExpanded, setIsDisclaimerExpanded] = useState(false);
 
   // If a user selects a university on mobile, auto-switch to map view to show details
   React.useEffect(() => {
@@ -107,13 +108,29 @@ export default function Dashboard() {
     <div className="flex flex-col h-screen w-full bg-slate-100 text-slate-900 overflow-hidden font-sans">
       <div className="h-1 w-full bg-black z-30 shrink-0" />
       {/* Top Navigation / Control Bar */}
-      <header className="h-16 flex items-center justify-between px-6 border-b border-slate-200 shrink-0 bg-white z-20 shadow-sm">
+      <header className="h-16 flex items-center justify-between px-6 border-b border-slate-200 shrink-0 bg-white z-30 shadow-sm relative">
         <div className="flex items-center gap-4 font-bold text-xl tracking-tight cursor-pointer" onClick={() => setSelectedUniversityId(null)}>
           <Image src="/aalto-icon.jpg" alt="Aalto University" className="h-10 w-auto object-contain" width={40} height={40} />
           <span className="text-black">Aalto Exchange</span>
         </div>
         
         <div className="flex items-center gap-4 sm:gap-6 text-sm font-semibold text-slate-500">
+          <div className="relative flex items-center">
+            <button 
+              onClick={() => setIsDisclaimerExpanded(!isDisclaimerExpanded)} 
+              className={`flex items-center gap-1.5 transition-colors font-bold ${isDisclaimerExpanded ? 'text-amber-700' : 'text-amber-600 hover:text-amber-700'}`}
+            >
+              <AlertTriangle className="w-4 h-4" />
+              <span className="hidden sm:inline">Disclaimer</span>
+            </button>
+            
+            {isDisclaimerExpanded && (
+              <div className="absolute right-0 top-full mt-5 w-72 sm:w-96 p-4 bg-amber-50 border border-amber-200 rounded-xl shadow-xl z-50 text-sm text-amber-900 font-medium leading-relaxed">
+                This project is not officially affiliated with or endorsed by Aalto University. While it synchronizes with the official MoveON database, parsing errors may occur. Always verify your eligibility, language requirements, and application deadlines on the <a href="https://aalto.adv-pub.moveon4.de/tech-destination-database-results/" target="_blank" rel="noopener noreferrer" className="underline font-bold hover:text-amber-700">official Aalto MoveON portal</a> before applying.
+              </div>
+            )}
+          </div>
+
           <button 
             onClick={() => setIsShortlistOpen(true)} 
             className={`flex items-center gap-1.5 transition-colors ${shortlist.length > 0 ? 'text-rose-500 hover:text-rose-600 font-bold' : 'hover:text-slate-900'}`}
@@ -217,6 +234,7 @@ export default function Dashboard() {
           <div className="px-5 py-3 border-b border-slate-200 flex flex-col gap-3 bg-white z-10 sticky top-0">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
               <span>{isLoading ? 'Loading...' : `${filteredUniversities.length} Destinations Available`}</span>
+              <span className="text-[10px] text-slate-400 font-medium">Last updated: April 2026</span>
             </div>
             
             <div className="flex bg-slate-100 p-1 rounded-md mt-2">

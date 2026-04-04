@@ -1,9 +1,9 @@
 {
   "tiers": {
     "1": { "label": "Affordable", "color": "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    "2": { "label": "Comparable", "color": "bg-yellow-100 text-yellow-700 border-yellow-200" },
+    "2": { "label": "Moderate", "color": "bg-yellow-100 text-yellow-700 border-yellow-200" },
     "3": { "label": "Expensive", "color": "bg-orange-100 text-orange-700 border-orange-200" },
-    "4": { "label": "High Budget", "color": "bg-rose-100 text-rose-700 border-rose-200" }
+    "4": { "label": "Very Expensive", "color": "bg-rose-100 text-rose-700 border-rose-200" }
   },
   "countries": {
     "Switzerland": 4,
@@ -66,6 +66,8 @@
     "Munich": 3,
     "Amsterdam": 4,
     "Stockholm": 3,
-    "Copenhagen": 4
+    "Copenhagen": 4,
+    "Hong Kong": 4,
+    "Singapore": 4
   }
 }
