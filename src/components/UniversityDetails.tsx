@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useUniversityContext } from '../context/UniversityContext';
-import { Trophy, MapPin, X, Globe2, BookOpen, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Users, Wallet, Heart } from 'lucide-react';
+import { Trophy, MapPin, X, Globe2, BookOpen, AlertTriangle, FileText, ExternalLink, DownloadCloud, Navigation, Info, TrendingUp, Wallet, Heart, ChevronDown } from 'lucide-react';
 import techStats from '../data/tech-statistics.json';
 import dynamic from 'next/dynamic';
 import Fuse from 'fuse.js';
@@ -37,6 +37,7 @@ export function UniversityDetails() {
   const [details, setDetails] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'reports'>('overview');
+  const [isAgreementsOpen, setIsAgreementsOpen] = useState(false);
 
   const baseUni = universities.find((u) => u.core_id === selectedUniversityId);
 
@@ -53,10 +54,12 @@ export function UniversityDetails() {
         const uni = universities.find(u => u.core_id === selectedUniversityId);
         if (!uni) return;
 
+        const relationIds = uni.variants?.map(v => v.relation_id) || [uni.relation_id];
+
         const res = await fetch('/api/fetch-uni-details', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ coreId: uni.core_id, relationId: uni.relation_id }),
+          body: JSON.stringify({ coreId: uni.core_id, relationIds }),
         });
         const data = await res.json();
         setDetails(data);
@@ -81,48 +84,41 @@ export function UniversityDetails() {
 
   // Find matching tech stats if available
   // Direct match or partial match
-  const getTechStat = () => {
-    if (!baseUni) return null;
+  const getTechStats = () => {
+    if (!baseUni) return [];
     
     // Check if we have an alias for this university name, else use the default
     const originalName = baseUni.universityname;
     const rawSearchName = UNIVERSITY_ALIASES[originalName] || originalName;
     const searchName = normalizeName(rawSearchName);
     
-    // First, try exact or simple inclusion
-    const match = techStats.find(stat => {
+    // Exact or simple inclusion
+    const matches = techStats.filter(stat => {
       const statName = normalizeName(stat.university_name);
-      return searchName.includes(statName) || statName.includes(searchName);
+      return searchName === statName || statName.includes(searchName) || searchName.includes(statName);
     });
 
-    if (match) return match;
+    if (matches.length > 0) return matches;
 
     // Fallback to fuzzy matching if exact inclusion fails
     const fuse = new Fuse(techStats, {
-      keys: ['university_name', 'original_name'],
-      threshold: 0.15, // tightened to avoid false positive matches like 'Institute of Science'
+      keys: ['university_name'],
+      threshold: 0.15,
       ignoreLocation: true,
       minMatchCharLength: 5,
     });
 
     const results = fuse.search(rawSearchName);
     if (results.length > 0) {
-      return results[0].item;
+      // Find all stats with the same university_name as the best match
+      const bestMatchName = results[0].item.university_name;
+      return techStats.filter(stat => stat.university_name === bestMatchName);
     }
 
-    return null;
+    return [];
   };
 
-  const techStat = getTechStat() || {
-    applicants_1st: '-',
-    applicants_2nd: '-',
-    applicants_3rd: '-',
-    applicants_total: '-',
-    index_2025: '-',
-    index_2024: '-',
-    index_2023: '-',
-    index_2022: '-'
-  };
+  const uniTechStats = getTechStats();
 
   const costTier = getCostTier(baseUni.country_fullname || baseUni.country, baseUni.universityname);
 
@@ -204,6 +200,7 @@ export function UniversityDetails() {
             )}
             
             <div className="flex items-center gap-2 ml-auto">
+
               {shortlist.includes(baseUni.core_id) ? (
                 <button
                   onClick={() => removeFromShortlist(baseUni.core_id)}
@@ -309,62 +306,44 @@ export function UniversityDetails() {
             </div>
 
             {/* Historical Tech Stats */}
-            {techStat && (
-              <section className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-6 shadow-sm">
+            {uniTechStats.length > 0 && (
+              <section className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-6 shadow-sm overflow-x-auto">
                 <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-indigo-500" />
                   Historical Tech Applications (AY2022-2025)
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="text-sm font-semibold text-indigo-800 mb-3 flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-indigo-400" />
-                      Applicant Breakdown (AY2025)
-                    </h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                        <span className="text-sm text-indigo-700">1st Choice</span>
-                        <span className="font-bold text-indigo-900">{techStat.applicants_1st}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                        <span className="text-sm text-indigo-700">2nd Choice</span>
-                        <span className="font-bold text-indigo-900">{techStat.applicants_2nd}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                        <span className="text-sm text-indigo-700">3rd Choice</span>
-                        <span className="font-bold text-indigo-900">{techStat.applicants_3rd}</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-indigo-100 px-3 py-2 rounded-lg border border-indigo-200">
-                        <span className="text-sm font-bold text-indigo-800">Total Applicants</span>
-                        <span className="font-bold text-indigo-900">{techStat.applicants_total}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-indigo-800 mb-3 flex items-center gap-1.5">
-                      <Trophy className="w-4 h-4 text-indigo-400" />
-                      Lowest Accepted Academic Index
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-white/60 p-3 rounded-lg text-center">
-                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2025</p>
-                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2025 !== '-' ? techStat.index_2025 : 'N/A'}</p>
-                      </div>
-                      <div className="bg-white/60 p-3 rounded-lg text-center">
-                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2024</p>
-                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2024 !== '-' ? techStat.index_2024 : 'N/A'}</p>
-                      </div>
-                      <div className="bg-white/60 p-3 rounded-lg text-center">
-                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2023</p>
-                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2023 !== '-' ? techStat.index_2023 : 'N/A'}</p>
-                      </div>
-                      <div className="bg-white/60 p-3 rounded-lg text-center">
-                        <p className="text-xs text-indigo-600 font-medium mb-1">AY2022</p>
-                        <p className="font-bold text-indigo-900 text-lg">{techStat.index_2022 !== '-' ? techStat.index_2022 : 'N/A'}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                
+                <table className="w-full text-left text-sm text-indigo-900 border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-indigo-200">
+                      <th className="py-2 px-3 font-semibold">Study Opportunity</th>
+                      <th className="py-2 px-3 font-semibold text-center" title="1st / 2nd / 3rd Choice">Applicants (1/2/3)</th>
+                      <th className="py-2 px-3 font-semibold text-center">Total</th>
+                      <th className="py-2 px-3 font-semibold text-center">Index &apos;25</th>
+                      <th className="py-2 px-3 font-semibold text-center">Index &apos;24</th>
+                      <th className="py-2 px-3 font-semibold text-center">Index &apos;23</th>
+                      <th className="py-2 px-3 font-semibold text-center">Index &apos;22</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {uniTechStats.map((stat, idx) => {
+                      const deptMatch = stat.original_name.split('‐');
+                      const dept = deptMatch.length > 1 ? deptMatch.slice(1).join('‐').trim() : stat.original_name;
+                      
+                      return (
+                        <tr key={idx} className="border-b border-indigo-100 hover:bg-white/40 transition-colors">
+                          <td className="py-3 px-3 font-medium min-w-[200px]">{dept}</td>
+                          <td className="py-3 px-3 text-center whitespace-nowrap">{stat.applicants_1st} / {stat.applicants_2nd} / {stat.applicants_3rd}</td>
+                          <td className="py-3 px-3 text-center font-bold">{stat.applicants_total}</td>
+                          <td className="py-3 px-3 text-center">{stat.index_2025 !== '-' ? stat.index_2025 : <span className="text-indigo-300">-</span>}</td>
+                          <td className="py-3 px-3 text-center">{stat.index_2024 !== '-' ? stat.index_2024 : <span className="text-indigo-300">-</span>}</td>
+                          <td className="py-3 px-3 text-center">{stat.index_2023 !== '-' ? stat.index_2023 : <span className="text-indigo-300">-</span>}</td>
+                          <td className="py-3 px-3 text-center">{stat.index_2022 !== '-' ? stat.index_2022 : <span className="text-indigo-300">-</span>}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </section>
             )}
 
@@ -406,6 +385,51 @@ export function UniversityDetails() {
                 <div className="prose prose-sm prose-slate max-w-none text-slate-600 [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800" dangerouslySetInnerHTML={{ __html: value.replace(/\|\|/g, '<br />') }} />
               </section>
             ))}
+
+            {/* Study Opportunities / Variants */}
+            {baseUni.variants && baseUni.variants.length > 0 && (
+              <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <button
+                  onClick={() => setIsAgreementsOpen(!isAgreementsOpen)}
+                  className="w-full p-5 flex items-center justify-between bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-500" />
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Agreements & Study Opportunities
+                      <span className="ml-2 text-sm font-normal text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full">{baseUni.variants.length}</span>
+                    </h3>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isAgreementsOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isAgreementsOpen && (
+                  <div className="divide-y divide-slate-100 border-t border-slate-200">
+                    {baseUni.variants.map((variant, idx) => (
+                      <div key={idx} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-slate-800 mb-1">
+                            {variant.studyOpportunity ? (
+                              <span dangerouslySetInnerHTML={{ __html: variant.studyOpportunity }} />
+                            ) : (
+                              <span>General Agreement</span>
+                            )}
+                          </p>
+                        </div>
+                        <a
+                          href={`https://aalto.adv-pub.moveon4.de/tech-destination-database-results/?core_id=${baseUni.core_id}&relation_id=${variant.relation_id}&openwhichtab=relations&hide_elements=true&whichtab=all`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-white text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors border border-blue-200 shadow-sm"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          View in Aalto DB
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
 
             {/* Data Protection Warning */}
                 {info['Data protection'] && (
