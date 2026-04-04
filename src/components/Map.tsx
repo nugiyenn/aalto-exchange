@@ -13,12 +13,12 @@ import { getCostTier } from '../lib/cost';
 // Function to create color-coded icon
 const createCustomIcon = (color: string) => {
   return L.divIcon({
-    html: `<div style="background-color: ${color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.4);"></div>`,
+    html: `<div style="background-color: ${color}; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.2s ease-in-out;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></div>`,
     className: 'custom-marker-icon', // Removed default styling
-    iconSize: [14, 14],
-    iconAnchor: [7, 7],
-    popupAnchor: [0, -7],
-    tooltipAnchor: [7, 0],
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -11],
+    tooltipAnchor: [11, 0],
   });
 };
 
